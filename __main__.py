@@ -1,9 +1,9 @@
 # http://turing.com.br/material/flask/index.html
 
 from flask import Flask, jsonify, render_template, redirect, url_for, request
-from model.ModelSqlite import ModelSQLITE, Task, TypeOrder
+from model.ModelSqlite import ModelSQLITE, Task, OrderType
 import model.TaskDao as taskDao
-import model.TypeOrderDao as typeOrderDao
+import model.OrderTypeDao as orderTypeDao
 import mysql.connector
 
 """
@@ -40,7 +40,7 @@ app = Flask('VoooHelp', static_folder='static', template_folder='template')
 @app.route('/')
 def index():
     #return jsonify(msg='Server is running', data=datetime.now())
-    return render_template(locate_html('index.html'))
+    return render_template(locate_html('index'))
 
 
 @app.route('/dashboard/')
@@ -62,21 +62,30 @@ def connectors():
 
 @app.route('/tasks/')
 def tasks():
-    tasks = taskDao.load()
-    typeOrders = typeOrderDao.load()
-    return render_template(locate_html('tasks'), tasks=tasks, typeOrders=typeOrders)
+    orders_type = orderTypeDao.load()
+
+    def set_selected(item):
+        item.selected = item.name == 'N3'
+        return item
+
+    orders_type = list(map(set_selected, orders_type))
+
+    tasks = taskDao.load() 
+    return render_template(locate_html('tasks'), tasks=tasks, ordersType=orders_type)
 
 
 @app.route('/tasks/', methods=['POST'])
 def addTask():
-    """
-        task = Task()
+    task = Task()
     task.name = request.form['type']
     taskDao.save(task)
-    """
-    task = TypeOrder()
-    task.name = request.form['type']
-    typeOrderDao.save(task)
+    return redirect(url_for('tasks'))
+
+
+@app.route('/addTypeOrder/', methods=['POST'])    
+def addTypeOrder():
+    order_type = OrderType(request.form['name'])
+    orderTypeDao.save(order_type)
     return redirect(url_for('tasks'))
 
 if __name__ == '__main__':
