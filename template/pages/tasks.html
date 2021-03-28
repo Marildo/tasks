@@ -21,7 +21,7 @@
       <div class="col-4">
         <label for="type">Tipo da Tarefa</label>
         <select class="form-control" id="type" name="type">
-          {% for type in ordersType %}
+          {% for type in task_types %}
           <option 
             value='{{type.id}}' 
             data = '{{type.selected}}'

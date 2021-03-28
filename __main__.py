@@ -1,9 +1,9 @@
 # http://turing.com.br/material/flask/index.html
 
 from flask import Flask, jsonify, render_template, redirect, url_for, request
-from model.ModelSqlite import ModelSQLITE, Task, OrderType
+from model.ModelSqlite import ModelSQLITE, Task, TaskType
 import model.TaskDao as taskDao
-import model.OrderTypeDao as orderTypeDao
+import model.TaskTypeDao as taskTypeDao
 import mysql.connector
 
 """
@@ -62,16 +62,16 @@ def connectors():
 
 @app.route('/tasks/')
 def tasks():
-    orders_type = orderTypeDao.load()
+    task_types = taskTypeDao.load()
 
     def set_selected(item):
         item.selected = item.name == 'N3'
         return item
 
-    orders_type = list(map(set_selected, orders_type))
+    task_types = list(map(set_selected, task_types))
 
     tasks = taskDao.load() 
-    return render_template(locate_html('tasks'), tasks=tasks, ordersType=orders_type)
+    return render_template(locate_html('tasks'), tasks=tasks, task_types=task_types)
 
 
 @app.route('/tasks/', methods=['POST'])
@@ -84,8 +84,8 @@ def addTask():
 
 @app.route('/addTypeOrder/', methods=['POST'])    
 def addTypeOrder():
-    order_type = OrderType(request.form['name'])
-    orderTypeDao.save(order_type)
+    task_type = TaskType(request.form['name'])
+    taskTypeDao.save(task_type)
     return redirect(url_for('tasks'))
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ class ModelSQLITE:
         db.create_all(app=self.app)
         #ma.init_app(self.app)
 
-class OrderType(db.Model):
+class TaskType(db.Model):
     id = Column(INTEGER, primary_key=True)
     name = Column(String, nullable=False, default='')
 
