@@ -1,10 +1,10 @@
 from sqlalchemy import Column, INTEGER, String,DATE, DATETIME
 from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
+#from flask_marshmallow import Marshmallow
 from datetime import datetime
 
 db = SQLAlchemy()
-ma = Marshmallow()
+#ma = Marshmallow()
 
 class ModelSQLITE:
     def __init__(self, app):
@@ -12,10 +12,15 @@ class ModelSQLITE:
 
     def connect(self):
         self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///task.sqlite3'
-        self.app.config['SCRET_KEY'] = 'MyScretKeyWord-kkkkk'
+        self.app.config['SCRET_KEY'] = 'kkkkkofsecurity'
         db.init_app(self.app)
         db.create_all(app=self.app)
-        ma.init_app(self.app)
+        #ma.init_app(self.app)
+
+class TypeOrder(db.Model):
+    id = Column(INTEGER, primary_key=True)
+    name = Column(String, nullable=False, default='')
+
 
 
 class Task(db.Model):
@@ -23,11 +28,21 @@ class Task(db.Model):
     name = Column(String, nullable=False, default='')
     day = Column(DATE, nullable=False, default=datetime.now())
 
+"""
+init = Column(DATETIME, default=datetime.now())
+finish = Column(DATETIME, default=datetime.now())
+"""
+
+
+
+"""
+#TODO move to outher file
 
 class TaskSchema(ma.Schema):
     class Meta:
         fields = ('id', 'name')
-"""
-init = Column(DATETIME, default=datetime.now())
-finish = Column(DATETIME, default=datetime.now())
+
+class TypeOrderSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'name')
 """

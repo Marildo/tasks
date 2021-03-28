@@ -15,9 +15,9 @@
         <div class="col-4">
           <label for="type">Tipo da Tarefa</label>
           <select class="form-control" id="type" name="type">
-            <option>Reunião</option>
-            <option>N3</option>
-            <option>Treinamento</option>
+            {% for type in  typeOrders %}
+            <option value='{{type.id}}'>{{type.name}}</option>
+            {% endfor %}
           </select>
         </div>
         <div class="p-4">
@@ -45,7 +45,6 @@
           {% endfor %}
         </tbody>
       </table>
-
     </div>
   </div>
 </div>
