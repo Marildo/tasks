@@ -22,9 +22,7 @@
         <label for="type">Tipo da Tarefa</label>
         <select class="form-control" id="type" name="type">
           {% for type in task_types %}
-          <option 
-            value='{{type.id}}' 
-            {% if type.selected %} selected {% endif %}>
+          <option value='{{type.id}}' {% if type.selected %} selected {% endif %}>
             {{type.name}}
           </option>
           {% endfor %}
@@ -39,25 +37,28 @@
   </form>
 </div>
 
-<div class="mt-2">
-  <table class="table">
-    <thead class="text-primary">
-      <th>ID</th>
-      <th>Name</th>
-      <th>Date</th>
-    </thead>
-    <tbody>
-      {% for task in tasks %}
-      <tr>
-        <td>{{ task.id }}</td>
-        <td>{{ task.task_type.name }}</td>
-        <td>{{ task.day }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-</div>
+<div class="row mt-4">
+  {% for task in tasks %}
+  <div class="col-md-4 col-sm-4">
+    <a href="/task/{{ task.id }}" >
+      <div class="card card-stats">
+        <div class="card-header card-header-success card-header-icon">
+          <div class="card-icon">
+            <i class="material-icons">task</i>
+          </div>
+          <p class="card-category">{{task.task_type.name}}</p>
+          <h4 class="card-title">Nº 765</h4>
+          <h4 class="card-title">Cliente: Braspag</h4>
+        </div>
+        <div class="card-footer">
+          <div class="stats">
+            <i class="material-icons">date_range</i> {{task.day}}
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
 </div>
 <!-- Modal Type Order-->
 <div class="modal fade" id="modalTypeOrder" tabindex="-1" role="dialog" aria-labelledby="modalType" aria-hidden="true">
@@ -70,7 +71,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form action="/addTypeOrder/" method="post" class="form-control">
+        <form action="/addTypeTask/" method="post" class="form-control">
           <div class="input-group mb-3">
             <input type="text" class="form-control" placeholder="Tipo da tarefa" aria-label="Tipo da tarefa" id='name'
               name='name' aria-describedby="button-addon2">

@@ -1,9 +1,10 @@
 # http://turing.com.br/material/flask/index.html
 
 from flask import Flask, jsonify, render_template, redirect, url_for, request
-from model.ModelSqlite import ModelSQLITE, Task, TaskType
+from model.ModelSqlite import ModelSQLITE, Task, TaskType, Order
 import model.TaskDao as taskDao
 import model.TaskTypeDao as taskTypeDao
+import model.OrderDao as orderDao
 import mysql.connector
 
 """
@@ -13,6 +14,7 @@ password='te4356sfh',
 database='vooo_prod_backend'
 """
 
+# TODO: Melhorar a forma de identificar tipos de tarefas
 
 class DAO:
     def load_clients(self):
@@ -82,11 +84,35 @@ def addTask():
     return redirect(url_for('tasks'))
 
 
-@app.route('/addTypeOrder/', methods=['POST'])    
-def addTypeOrder():
+@app.route('/addTypeTask/', methods=['POST'])    
+def addTypeTask():
     task_type = TaskType(request.form['name'])
     taskTypeDao.save(task_type)
     return redirect(url_for('tasks'))
+
+
+@app.route('/task/<int:id>')
+def task(id: int):
+    order = None
+    task = taskDao.load_by_id(id)
+    if task and task.task_type.name == "N3":
+        order = orderDao.load(id)
+    return render_template(locate_html('task'), task=task, order=order)
+
+
+@app.route('/addOrder/', methods=['POST'])
+def addOrder():
+    form = request.form
+    order = Order()
+    order.task_id = form['taskId']
+    order.number = form['orderNumber']
+    order.client_id = form['clientId']
+    order.client_name = form['clientName']
+    order.aggregator = form['aggregator']
+    orderDao.save(order)
+    return redirect(url_for('task', id=order.task_id))
+
+
 
 if __name__ == '__main__':
     modelSqlite = ModelSQLITE(app)

@@ -26,6 +26,14 @@ class TaskType(db.Model):
     def __init__(self, name):
         self.name = name
 
+class Order(db.Model):
+    __tablename__ = 'order'
+    id = Column(INTEGER, primary_key=True)
+    number = Column(INTEGER, nullable=False, default='0')
+    client_name = Column(String)
+    client_id = Column(String)
+    aggregator = Column(String)   
+    task_id = Column(INTEGER, ForeignKey('task.id'))
 
 
 class Task(db.Model):
@@ -35,6 +43,8 @@ class Task(db.Model):
     day = Column(DATE, nullable=False, default=datetime.now())
     type_id = Column(INTEGER, ForeignKey('tasktype.id'))
     task_type = relationship('TaskType')
+    order = relationship('Order')
+
 
 """
 init = Column(DATETIME, default=datetime.now())
