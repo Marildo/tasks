@@ -77,7 +77,7 @@ def tasks():
 @app.route('/tasks/', methods=['POST'])
 def addTask():
     task = Task()
-    task.name = request.form['type']
+    task.type_id = request.form['type']
     taskDao.save(task)
     return redirect(url_for('tasks'))
 

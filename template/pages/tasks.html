@@ -24,7 +24,6 @@
           {% for type in task_types %}
           <option 
             value='{{type.id}}' 
-            data = '{{type.selected}}'
             {% if type.selected %} selected {% endif %}>
             {{type.name}}
           </option>
@@ -51,7 +50,7 @@
       {% for task in tasks %}
       <tr>
         <td>{{ task.id }}</td>
-        <td>{{ task.name }}</td>
+        <td>{{ task.task_type.name }}</td>
         <td>{{ task.day }}</td>
       </tr>
       {% endfor %}
