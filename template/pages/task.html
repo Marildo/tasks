@@ -1,25 +1,90 @@
 {% extends "layout/layout.html" %}
+
+
 {% block content %}
+<nav class="navbar navbar-light bg-info">
+  <p class="h1 title pl-2">{{task.task_type.name}}</p>
+</nav>
+
 <div class="p-3">
-  <form class="row" action="/addOrder/" method="POST">
-    <div class="form-group col-2">
-      <input type="hidden" name="taskId" value="{{task.id}}">
-      <label for="aggregator" class="bmd-label-floating">Agregador</label>
-      <input type="text" class="form-control" id="aggregator" name="aggregator" value="{{order.aggregator}}">
+  {% if isN3 %}
+  <div>
+    <p class="h3 text-white">Chamado
+      <hr>
+    </p>
+    <form class="row" action="/addOrder/" method="POST">
+      <div class="form-group col-2">
+        <input type="hidden" name="taskId" value="{{task.id}}">
+        <label for="aggregator" class="bmd-label-floating">Agregador</label>
+        <input type="text" class="form-control" id="aggregator" name="aggregator" value="{{order.aggregator}}">
+      </div>
+      <div class="form-group col-2">
+        <label for="orderNumber" class="bmd-label-floating">Número do chamado</label>
+        <input type="number" class="form-control" id="orderNumber" name="orderNumber" value="{{order.number}}">
+      </div>
+      <div class="form-group col-2">
+        <label for="clientId" class="bmd-label-floating">Id Cliente</label>
+        <input type="text" class="form-control" id="clientId" name="clientId" value="{{order.client_id}}">
+      </div>
+      <div class="form-group col-2">
+        <label for="clientName" class="bmd-label-floating">Cliente</label>
+        <input type="text" class="form-control" id="clientName" name="clientName" value="{{order.client_name}}">
+      </div>
+      <button type="submit" class="btn btn-primary"> <i class="material-icons">save</i> Salvar</button>
+    </form>
+  </div>
+  {% endif %}
+  <div>
+    <p class="h3 text-white">Ações
+      <button type="button" class="btn btn-primary btn-round btn-just-icon" data-toggle="collapse"
+        data-target="#formAction" aria-expanded="false" aria-controls="formAction" onclick="setInit()">
+        <i class="material-icons">add</i>
+      </button>
+      <hr>
+    </p>
+    <div class="collapse" id="formAction">
+      <form action="/addAction/" method="POST" class="row">
+        <div class="form-group col-7">
+          <input type="hidden" name="taskId" value="{{task.id}}">
+          <label for="description">Descrição</label>
+          <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+        </div>
+        <div class="form-group col-3">
+          <label for="init">Inicio</label>
+          <input type="datetime-local" class="form-control" id="init" name="init" style="height: 53px;"></input>
+        </div>
+        <button type="submit" class="btn btn-primary"> <i class="material-icons">save</i> Salvar</button>
+      </form>
     </div>
-    <div class="form-group col-2">
-      <label for="orderNumber" class="bmd-label-floating">Número do chamado</label>
-      <input type="number" class="form-control" id="orderNumber" name="orderNumber" value="{{order.number}}">
-    </div>
-    <div class="form-group col-2">
-      <label for="clientId" class="bmd-label-floating">Id Cliente</label>
-      <input type="text" class="form-control" id="clientId" name="clientId" value="{{order.client_id}}">
-    </div>
-    <div class="form-group col-2">
-      <label for="clientName" class="bmd-label-floating">Cliente</label>
-      <input type="text" class="form-control" id="clientName" name="clientName" value="{{order.client_name}}">
-    </div>
-    <button type="submit" class="btn btn-primary"> <i class="material-icons">save</i> Salvar</button>
-  </form>
+
+    <table class="table">
+      <thead class=" text-primary">
+        <th>Descricao</th>
+        <th>Data Inicio</th>
+        <th>Finalizar</th>
+      </thead>
+      <tbody>
+        {% for action in task.actions %}
+        <tr>
+          <td style="width: 70%;">{{ action.description }}</td>
+          <td>{{ action.init }}</td>
+          <td><a href="/finalize/{{action.id}}" class="btn btn-success">Finalizar</a> </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+  </div>
 </div>
+<script>
+  function setInit() {
+    const data = new Date();
+    const month = ("0" + (data.getMonth() + 1)).slice(-2)
+    const day = ("0" + (data.getDate())).slice(-2)
+    const hour = ("0" + (data.getHours())).slice(-2)
+    const minute = ("0" + (data.getMinutes())).slice(-2)
+    const dataFormatada = `${data.getFullYear()}-${month}-${day}T${hour}:${minute}`;
+
+    const input = document.getElementById("init");
+    input.value = dataFormatada
+  }
+</script>
 {% endblock %}

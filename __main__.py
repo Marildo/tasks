@@ -1,10 +1,12 @@
 # http://turing.com.br/material/flask/index.html
 
 from flask import Flask, jsonify, render_template, redirect, url_for, request
-from model.ModelSqlite import ModelSQLITE, Task, TaskType, Order
+from model.ModelSqlite import ModelSQLITE, Task, TaskType, Order, Action
+from datetime import datetime
 import model.TaskDao as taskDao
 import model.TaskTypeDao as taskTypeDao
 import model.OrderDao as orderDao
+import model.ActionDao as actionDao
 import mysql.connector
 
 """
@@ -77,11 +79,11 @@ def tasks():
 
 
 @app.route('/tasks/', methods=['POST'])
-def addTask():
+def add_task():
     task = Task()
     task.type_id = request.form['type']
-    taskDao.save(task)
-    return redirect(url_for('tasks'))
+    task = taskDao.save(task)
+    return redirect(url_for('task', id=task.id))
 
 
 @app.route('/addTypeTask/', methods=['POST'])    
@@ -93,15 +95,17 @@ def addTypeTask():
 
 @app.route('/task/<int:id>')
 def task(id: int):
-    order = None
     task = taskDao.load_by_id(id)
-    if task and task.task_type.name == "N3":
-        order = orderDao.load(id)
-    return render_template(locate_html('task'), task=task, order=order)
+    if not task:
+        return render_template(locate_html('error'), msg='Tarefa não encontrada')
+
+    isN3 = task.task_type.name == "N3"
+    order = task.order[0] if isN3 and len(task.order) > 0 else None
+    return render_template(locate_html('task'), task=task, order=order, isN3=isN3)
 
 
 @app.route('/addOrder/', methods=['POST'])
-def addOrder():
+def add_order():
     form = request.form
     order = Order()
     order.task_id = form['taskId']
@@ -112,6 +116,24 @@ def addOrder():
     orderDao.save(order)
     return redirect(url_for('task', id=order.task_id))
 
+
+@app.route('/addAction/', methods=['POST'])
+def add_action():
+    form = request.form
+    action = Action()
+    action.task_id = form['taskId']
+    action.description = form['description']
+    action.init = datetime.strptime(form['init'].replace('T', ' '), '%Y-%m-%d %H:%M')
+    actionDao.save(action)
+    return redirect(url_for('task', id=action.task_id))
+
+
+@app.route('/finalize/<int:id>')
+def finalize_action(id):
+    action = actionDao.load(id)
+    action.finish = datetime.now()
+    actionDao.save(action)
+    return redirect(url_for('task', id=action.task_id))
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, INTEGER, String, DATE, ForeignKey
+from sqlalchemy import Column, INTEGER, String, DATE, DATETIME, ForeignKey
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 #from flask_marshmallow import Marshmallow
@@ -26,6 +26,16 @@ class TaskType(db.Model):
     def __init__(self, name):
         self.name = name
 
+
+class Action(db.Model):
+    __tablename__ = 'action'
+    id = Column(INTEGER, primary_key=True)
+    description = Column(String, nullable=False, default='')
+    init = Column(DATETIME, default=datetime.now())
+    finish = Column(DATETIME, nullable=True)
+    task_id = Column(INTEGER, ForeignKey('task.id'))
+
+
 class Order(db.Model):
     __tablename__ = 'order'
     id = Column(INTEGER, primary_key=True)
@@ -43,14 +53,8 @@ class Task(db.Model):
     day = Column(DATE, nullable=False, default=datetime.now())
     type_id = Column(INTEGER, ForeignKey('tasktype.id'))
     task_type = relationship('TaskType')
-    order = relationship('Order')
-
-
-"""
-init = Column(DATETIME, default=datetime.now())
-finish = Column(DATETIME, default=datetime.now())
-"""
-
+    order = relationship('Order', backref='Task', lazy=False)
+    actions = relationship('Action', backref='Task', lazy=False)
 
 
 """
