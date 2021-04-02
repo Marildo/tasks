@@ -1,4 +1,4 @@
-from sqlalchemy import Column, INTEGER, String, DATE, DATETIME, ForeignKey
+from sqlalchemy import Column, INTEGER, String, DATE, DATETIME,BOOLEAN, ForeignKey
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 #from flask_marshmallow import Marshmallow
@@ -12,7 +12,7 @@ class ModelSQLITE:
         self.app = app
 
     def connect(self):
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///model/task.sqlite3'
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///model/db/task.sqlite3'
         self.app.config['SCRET_KEY'] = 'kkkkkofsecurity'
         db.init_app(self.app)
         db.create_all(app=self.app)
@@ -33,6 +33,7 @@ class Action(db.Model):
     description = Column(String, nullable=False, default='')
     init = Column(DATETIME, default=datetime.now())
     finish = Column(DATETIME, nullable=True)
+    finished = Column(BOOLEAN, nullable=False, default=False)
     task_id = Column(INTEGER, ForeignKey('task.id'))
 
 
@@ -43,8 +44,6 @@ class Order(db.Model):
     client_name = Column(String)
     client_id = Column(String)
     aggregator = Column(String)   
-    task_id = Column(INTEGER, ForeignKey('task.id'))
-
 
 class Task(db.Model):
     __tablename__ = 'task'
@@ -53,7 +52,8 @@ class Task(db.Model):
     day = Column(DATE, nullable=False, default=datetime.now())
     type_id = Column(INTEGER, ForeignKey('tasktype.id'))
     task_type = relationship('TaskType')
-    order = relationship('Order', backref='Task', lazy=False)
+    order_id = Column(INTEGER, ForeignKey('order.id'))
+    order = relationship('Order')
     actions = relationship('Action', backref='Task', lazy=False)
 
 

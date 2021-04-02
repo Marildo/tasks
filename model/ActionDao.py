@@ -8,7 +8,7 @@ def save(action):
     return action
 
 
-def load(id: int):
-    all = Action.query.filter(Action.id == id).all()
+def load_running(task_id: int):
+    all = Action.query.filter(Action.task_id == task_id, Action.finished == False).all()
     return all[0] if len(all) > 0 else None
 

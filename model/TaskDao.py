@@ -1,3 +1,5 @@
+from sqlalchemy.sql.expression import update
+
 from model.ModelSqlite import db, Task
 
 
@@ -12,5 +14,9 @@ def load():
 
 
 def load_by_id(id: int):
-    all = Task.query.filter(Task.id == id).all()
-    return all[0] if len(all) > 0 else None
+    return Task.query.filter(Task.id == id).first()
+
+
+def set_order(order):
+    db.session.query(Task).filter(Task.id == order.task_id).update({"order_id":order.id})
+    db.session.commit()
