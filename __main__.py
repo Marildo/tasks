@@ -69,12 +69,15 @@ def clients():
 def connectors():
     return render_template(locate_html('connectors'))
 
+@app.route('/settings/')
+def settings():
+    task_types = taskTypeDao.load()
+    return render_template(locate_html('settings'), task_types=task_types)
+
 
 @app.route('/tasks/')
 def tasks():
     try:
-        fd = 2
-        fd.uper()
         task_types = taskTypeDao.load()
 
         def set_selected(item):
@@ -101,7 +104,7 @@ def add_task():
 def addTypeTask():
     task_type = TaskType(request.form['name'])
     taskTypeDao.save(task_type)
-    return redirect(url_for('tasks'))
+    return redirect(url_for('settings'))
 
 
 @app.route('/task/<int:id>')
@@ -156,7 +159,7 @@ def page_not_found(e):
 
 @app.errorhandler(500)
 def internal_server_error(e):
-    return render_template(locate_html('error'), msg = e), 500  # Internal Server Error
+    return render_template(locate_html('error'), msg=e), 500  # Internal Server Error
 
 
 if __name__ == '__main__':
