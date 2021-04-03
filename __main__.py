@@ -69,17 +69,17 @@ def clients():
 def connectors():
     return render_template(locate_html('connectors'))
 
+
 @app.route('/settings/')
 def settings():
     task_types = taskTypeDao.load()
     return render_template(locate_html('settings'), task_types=task_types)
 
 
-@app.route('/tasks/')
+@app.route('/tasks/', methods=['GET'])
 def tasks():
     try:
         task_types = taskTypeDao.load()
-
         def set_selected(item):
             item.selected = item.name == 'N3'
             return item
@@ -87,7 +87,8 @@ def tasks():
         task_types = list(map(set_selected, task_types))
 
         tasks = taskDao.load()
-        return render_template(locate_html('tasks'), tasks=tasks, task_types=task_types)
+        sumary_date = datetime.now().strftime('%Y-%m-%d')
+        return render_template(locate_html('tasks'), tasks=tasks, task_types=task_types, sumary_date=sumary_date)
     except Exception as e:
         abort(500, description=e)
 
@@ -96,8 +97,8 @@ def tasks():
 def add_task():
     task = Task()
     task.type_id = request.form['type']
-    task = taskDao.save(task)
-    return redirect(url_for('task', id=task.id))
+    taskDao.save(task)
+    return redirect(url_for('task', id=task.id, ))
 
 
 @app.route('/addTypeTask/', methods=['POST'])
@@ -150,6 +151,15 @@ def finalize_action(id):
     action.finished = True
     actionDao.save(action)
     return redirect(url_for('task', id=action.task_id))
+
+
+@app.route('/sumary/', methods=['POST'])
+def sumary():
+    sumary_date = request.form['sumary_date']
+    sumary = orderDao.sumary(sumary_date)
+    for item in sumary:
+        print(item.Action.id)
+    return render_template(locate_html('sumary'), sumary=sumary, sumary_date=sumary_date)
 
 
 @app.errorhandler(404)

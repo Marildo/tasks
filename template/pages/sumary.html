@@ -26,29 +26,33 @@
 
 <div class="card">
   <div class="card-body">
-    <div class="row mt-4">
-      {% for task in tasks %}
-      <div class="col-md-4 col-sm-4">
-        <a href="/task/{{ task.id }}">
-          <div class="card card-stats">
-            <div class="card-header card-header-success card-header-icon">
-              <div class="card-icon">
-                <i class="material-icons">task</i>
-              </div>
-              <p class="card-category">{{task.task_type.name}}</p>
-              <h4 class="card-title">Nº 765</h4>
-              <h4 class="card-title">Cliente: Braspag</h4>
-            </div>
-            <div class="card-footer">
-              <div class="stats">
-                <i class="material-icons">date_range</i> {{task.day}}
-              </div>
-            </div>
-          </div>
-        </a>
-      </div>
-      {% endfor %}
-    </div>
+      <table class="table">
+        <thead>
+          <th>Tipo</th>
+          <th>Id N3</th>
+          <th>Agregador</th>
+          <th>Cliente</th>
+          <th>Descrição</th>
+          <th>Inicio</th>
+          <th>Fim</th>
+        </thead>
+        <tbody>
+          {% for item in sumary %}
+          <tr>
+            <td>{{item.TaskType.name}}</td>
+            <td>{{item.Order.number}}</td>
+            <td>{{item.Order.aggregator}}</td>
+            <td>{{item.Order.client_id}} - {{item.Order.client_name}}</td>
+            <td>{{item.Action.description}}</td>
+            <td>{{item.Action.init}}</td>
+            <td>{{item.Action.finish}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+     
+
+   
   </div>
 </div>
 
