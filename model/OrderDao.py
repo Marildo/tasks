@@ -1,5 +1,6 @@
-from model.ModelSqlite import db, Order, Action, Task, TaskType
 from datetime import datetime, timedelta
+
+from model.ModelSqlite import db, Order, Action, Task, TaskType
 
 
 # TODO: Metodos semelhamentes, usar herança e generics
@@ -22,4 +23,18 @@ def sumary(sumary_date: str):
         .join(TaskType, TaskType.id == Task.type_id) \
         .outerjoin(Order, Order.id == Task.order_id) \
         .filter(Action.init >= sumary_date, Action.finish <= finish)
+    return query.all()
+
+
+def load_form_export(sumary_date: str):
+    sql = "SELECT tt.name,  a.description, o.number, date(init), " +\
+          "sum(CAST ((julianday(a.finish) - julianday(a.init)) * 24 * 60 as INTEGER)) minutes " +\
+          "FROM task t " +\
+          "LEFT JOIN action a on a.task_id = t.id " +\
+          "LEFT JOIN 'order' o on o.id = t.order_id " +\
+          "INNER JOIN tasktype tt on tt.id = t.type_id " +\
+          "WHERE date(init) = '" + sumary_date + "' GROUP BY t.id"
+
+    connection = db.session.connection()
+    query = connection.execute(sql)
     return query.all()

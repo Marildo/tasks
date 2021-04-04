@@ -1,7 +1,9 @@
 # http://turing.com.br/material/flask/index.html
 # https://www3.ntu.edu.sg/home/ehchua/programming/webprogramming/Python3_Flask.html
+# https://fonts.google.com/icons?selected=Material+Icons:add_circle_outline&icon.query=down
 
-from datetime import datetime
+from csv import writer
+from datetime import datetime,timedelta
 
 import mysql.connector
 from flask import Flask, render_template, redirect, url_for, request, abort
@@ -80,6 +82,7 @@ def settings():
 def tasks():
     try:
         task_types = taskTypeDao.load()
+
         def set_selected(item):
             item.selected = item.name == 'N3'
             return item
@@ -157,9 +160,43 @@ def finalize_action(id):
 def sumary():
     sumary_date = request.form['sumary_date']
     sumary = orderDao.sumary(sumary_date)
-    for item in sumary:
-        print(item.Action.id)
     return render_template(locate_html('sumary'), sumary=sumary, sumary_date=sumary_date)
+
+
+@app.route('/exportCSV/', methods=['POST'])
+def export_csv():
+    sumary_date = request.form['sumary_date']
+    sumary = orderDao.load_form_export(sumary_date)
+
+    week_days = ('domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado')
+    months = (
+        'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro',
+        'dezembro')
+
+    with open('day.csv', 'w',encoding='utf-8', newline='') as file:
+        pointer = writer(file)
+        for type, description, number, init, minutes in sumary:
+            date = datetime.strptime(init, '%Y-%m-%d')
+            week_day = datetime.strftime(date, '%w')
+            week_day = week_days[int(week_day)]
+            month_day = datetime.strftime(date, '%d')
+            month = datetime.strftime(date, '%m')
+            month = months[int(month)-1]
+            year = datetime.strftime(date, '%Y')
+            hours = datetime(year=1, month=1, day=1) + timedelta(minutes=minutes)
+
+            day = f'{week_day}, {month_day} de {month} de {year}'
+
+            if type == 'N3':
+                activity = f'N3 Id: {number}'
+            else:
+                activity = f'{type} {description}'
+
+            hours = datetime.strftime(hours, '%H:%M:%S')
+
+            pointer.writerow([day, activity, hours])
+
+    return redirect(url_for('sumary', sumary_date=sumary_date), code=307)
 
 
 @app.errorhandler(404)

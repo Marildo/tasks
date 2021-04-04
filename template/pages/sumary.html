@@ -26,34 +26,40 @@
 
 <div class="card">
   <div class="card-body">
-      <table class="table">
-        <thead>
-          <th>Tipo</th>
-          <th>Id N3</th>
-          <th>Agregador</th>
-          <th>Cliente</th>
-          <th>Descrição</th>
-          <th>Inicio</th>
-          <th>Fim</th>
-        </thead>
-        <tbody>
-          {% for item in sumary %}
-          <tr>
-            <td>{{item.TaskType.name}}</td>
-            <td>{{item.Order.number}}</td>
-            <td>{{item.Order.aggregator}}</td>
-            <td>{{item.Order.client_id}} - {{item.Order.client_name}}</td>
-            <td>{{item.Action.description}}</td>
-            <td>{{item.Action.init}}</td>
-            <td>{{item.Action.finish}}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-     
-
-   
+    <table class="table">
+      <thead>
+        <th>Tipo</th>
+        <th>Id N3</th>
+        <th>Agregador</th>
+        <th>Cliente</th>
+        <th>Descrição</th>
+        <th>Inicio</th>
+        <th>Fim</th>
+      </thead>
+      <tbody>
+        {% for item in sumary %}
+        <tr>
+          <td>{{item.TaskType.name}}</td>
+          <td>{{item.Order.number}}</td>
+          <td>{{item.Order.aggregator}}</td>
+          <td>{{item.Order.client_id}} - {{item.Order.client_name}}</td>
+          <td>{{item.Action.description}}</td>
+          <td>{{item.Action.init}}</td>
+          <td>{{item.Action.finish}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
+</div>
+
+<div class="d-flex justify-content-end p-2">
+  <form action="/exportCSV/" method="POST">
+    <input type="hidden" name="sumary_date" value="{{ sumary_date }}">
+    <button class="btn btn-success" type="submit">
+      <i class="material-icons">file_download</i> Exportar para CSV
+    </button>
+  </form>
 </div>
 
 <!-- Modal new Task-->

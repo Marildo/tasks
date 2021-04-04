@@ -18,5 +18,5 @@ def load_by_id(id: int):
 
 
 def set_order(order):
-    db.session.query(Task).filter(Task.id == order.task_id).update({"order_id":order.id})
+    db.session.query(Task).filter(Task.id == order.task_id).update({"order_id": order.id})
     db.session.commit()
