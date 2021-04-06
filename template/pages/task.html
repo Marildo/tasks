@@ -39,12 +39,13 @@
       <div class="col-10 h3 text-white">Ações </div>
       <div class="col">
         {% if task.running %}
-        <a href="/finalize/{{task.id}}" class="btn btn-success">
-          <i class="material-icons">thumb_up</i> Finalizar
-        </a>
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modalFinalize"
+          aria-expanded="false" aria-controls="formAction" onclick="setNow()">
+          <i class="material-icons">thumb_up</i>Finalizar
+        </button>
         {% else %}
         <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#modalNewAction"
-          aria-expanded="false" aria-controls="formAction" onclick="setInit()">
+          aria-expanded="false" aria-controls="formAction" onclick="setNow()">
           <i class="material-icons">add</i>Nova
         </button>
         {% endif %}
@@ -104,8 +105,37 @@
   </div>
 </div>
 
+<!-- Modal Finalize -->
+<div class="modal fade" id="modalFinalize" tabindex="-1" role="dialog" aria-labelledby="modalType" aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalType">Finalizar tarefa</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form action="/finalize/" method="post">
+        <input type="hidden" name="taskId" value="{{task.id}}">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="finish">Hora de término</label>
+            <input type="datetime-local" class="form-control" id="finish" name="finish"></input>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">
+            <i class="material-icons">save</i>
+            Finalizar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
-  function setInit() {
+  function setNow() {
     const data = new Date();
     const month = ("0" + (data.getMonth() + 1)).slice(-2)
     const day = ("0" + (data.getDate())).slice(-2)
@@ -113,8 +143,11 @@
     const minute = ("0" + (data.getMinutes())).slice(-2)
     const dataFormatada = `${data.getFullYear()}-${month}-${day}T${hour}:${minute}`;
 
-    const input = document.getElementById("init");
-    input.value = dataFormatada
+    const init = document.getElementById("init");
+    init.value = dataFormatada
+
+    const finish = document.getElementById("finish");
+    finish.value = dataFormatada
   }
 </script>
 {% endblock %}

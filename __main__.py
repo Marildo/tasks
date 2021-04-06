@@ -1,4 +1,5 @@
 # http://turing.com.br/material/flask/index.html
+# https://demos.creative-tim.com/material-dashboard-dark/docs/2.0/components/card.html
 # https://www3.ntu.edu.sg/home/ehchua/programming/webprogramming/Python3_Flask.html
 # https://fonts.google.com/icons?selected=Material+Icons:add_circle_outline&icon.query=down
 
@@ -147,12 +148,17 @@ def add_action():
     return redirect(url_for('task', id=action.task_id))
 
 
-@app.route('/finalize/<int:id>')
-def finalize_action(id):
-    action = actionDao.load_running(id)
-    action.finish = datetime.now()
+@app.route('/finalize/', methods=['POST'])
+def finalize_action():
+    form = request.form
+    task_id = form['taskId']
+    finish = datetime.strptime(form['finish'].replace('T', ' '), '%Y-%m-%d %H:%M')
+ 
+    action = actionDao.load_running(task_id)
+    action.finish = finish
     action.finished = True
     actionDao.save(action)
+
     return redirect(url_for('task', id=action.task_id))
 
 
@@ -173,9 +179,10 @@ def export_csv():
         'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro',
         'dezembro')
 
-    with open('day.csv', 'w',encoding='utf-8', newline='') as file:
+    with open('day.csv', 'w', encoding='utf-8', newline='') as file:
         pointer = writer(file)
-        for type, description, number, init, minutes in sumary:
+        total_hours = datetime(year=1, month=1, day=1)
+        for task_id, type, description, number, init, seconds in sumary:
             date = datetime.strptime(init, '%Y-%m-%d')
             week_day = datetime.strftime(date, '%w')
             week_day = week_days[int(week_day)]
@@ -183,18 +190,20 @@ def export_csv():
             month = datetime.strftime(date, '%m')
             month = months[int(month)-1]
             year = datetime.strftime(date, '%Y')
-            hours = datetime(year=1, month=1, day=1) + timedelta(minutes=minutes)
-
-            day = f'{week_day}, {month_day} de {month} de {year}'
+            hours = datetime(year=1, month=1, day=1) + timedelta(seconds=seconds)
+            total_hours = total_hours + timedelta(seconds=seconds)
 
             if type == 'N3':
                 activity = f'N3 Id: {number}'
             else:
                 activity = f'{type} {description}'
 
+            day = f'{week_day}, {month_day} de {month} de {year}'
             hours = datetime.strftime(hours, '%H:%M:%S')
-
             pointer.writerow([day, activity, hours])
+
+        total_hours = datetime.strftime(total_hours, '%H:%M:%S')
+        pointer.writerow(['', 'Total', total_hours])
 
     return redirect(url_for('sumary', sumary_date=sumary_date), code=307)
 
