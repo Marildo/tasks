@@ -4,7 +4,7 @@
 # https://fonts.google.com/icons?selected=Material+Icons:add_circle_outline&icon.query=down
 
 from csv import writer
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 
 import mysql.connector
 from flask import Flask, render_template, redirect, url_for, request, abort
@@ -25,6 +25,8 @@ database='vooo_prod_backend'
 
 # TODO: Melhorar a forma de identificar tipos de tarefas
 # TODO: Adicionar um decorator para tratar exception
+# TODO: Editar descrição de action
+# TODO: Dados do card de task
 
 class DAO:
     def load_clients(self):
@@ -42,12 +44,22 @@ class DAO:
         return result
 
 
+
+
+app = Flask('VoooHelp', static_folder='static', template_folder='template')
+
 def locate_html(page: str) -> str:
     return f'pages/{page}.html'
     # TODO : Testar se arquivo existe
 
+def load_task_types():
+    task_types = taskTypeDao.load()
 
-app = Flask('VoooHelp', static_folder='static', template_folder='template')
+    def set_selected(item):
+        item.selected = item.name == 'N3'
+        return item
+
+    return list(map(set_selected, task_types))
 
 
 @app.route('/')
@@ -79,25 +91,27 @@ def settings():
     return render_template(locate_html('settings'), task_types=task_types)
 
 
-@app.route('/tasks/', methods=['GET'])
+@app.route('/tasks/', methods=['GET', 'POST'])
 def tasks():
     try:
-        task_types = taskTypeDao.load()
+        sumary_date = datetime.now().strftime('%Y-%m-%d') \
+            if request.method == 'GET' else request.form['sumary_date']
 
-        def set_selected(item):
-            item.selected = item.name == 'N3'
-            return item
+        search = request.form['search'] if 'search' in request.form else None
+        if search:
+            tasks = taskDao.load_by_search(search)
+        else:
+            tasks = taskDao.load_by_date(sumary_date)
 
-        task_types = list(map(set_selected, task_types))
-
-        tasks = taskDao.load()
-        sumary_date = datetime.now().strftime('%Y-%m-%d')
-        return render_template(locate_html('tasks'), tasks=tasks, task_types=task_types, sumary_date=sumary_date)
+        sumary = orderDao.sumary(sumary_date)
+        task_types = load_task_types()
+        return render_template(locate_html('tasks'), tasks=tasks, task_types=task_types, sumary=sumary,
+                               sumary_date=sumary_date)
     except Exception as e:
         abort(500, description=e)
 
 
-@app.route('/tasks/', methods=['POST'])
+@app.route('/addtask/', methods=['POST'])
 def add_task():
     task = Task()
     task.type_id = request.form['type']
@@ -153,20 +167,14 @@ def finalize_action():
     form = request.form
     task_id = form['taskId']
     finish = datetime.strptime(form['finish'].replace('T', ' '), '%Y-%m-%d %H:%M')
- 
+
     action = actionDao.load_running(task_id)
     action.finish = finish
     action.finished = True
+    action.description = form['description']
     actionDao.save(action)
 
     return redirect(url_for('task', id=action.task_id))
-
-
-@app.route('/sumary/', methods=['POST'])
-def sumary():
-    sumary_date = request.form['sumary_date']
-    sumary = orderDao.sumary(sumary_date)
-    return render_template(locate_html('sumary'), sumary=sumary, sumary_date=sumary_date)
 
 
 @app.route('/exportCSV/', methods=['POST'])
@@ -188,9 +196,12 @@ def export_csv():
             week_day = week_days[int(week_day)]
             month_day = datetime.strftime(date, '%d')
             month = datetime.strftime(date, '%m')
-            month = months[int(month)-1]
+            month = months[int(month) - 1]
             year = datetime.strftime(date, '%Y')
-            hours = datetime(year=1, month=1, day=1) + timedelta(seconds=seconds)
+
+            flag = seconds % 60
+            flag = 60 - flag
+            hours = datetime(year=1, month=1, day=1) + timedelta(seconds=seconds+flag)
             total_hours = total_hours + timedelta(seconds=seconds)
 
             if type == 'N3':
@@ -205,7 +216,7 @@ def export_csv():
         total_hours = datetime.strftime(total_hours, '%H:%M:%S')
         pointer.writerow(['', 'Total', total_hours])
 
-    return redirect(url_for('sumary', sumary_date=sumary_date), code=307)
+    return redirect(url_for('tasks', sumary_date=sumary_date), code=307)
 
 
 @app.errorhandler(404)

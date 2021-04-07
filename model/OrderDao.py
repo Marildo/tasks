@@ -28,7 +28,7 @@ def sumary(sumary_date: str):
 
 def load_form_export(sumary_date: str):
     sql = "SELECT t.id, tt.name,  a.description, o.number, date(init), " +\
-          "sum(CAST ((julianday(a.finish) - julianday(a.init)) * 24 * 60 * 60 + 1 as INTEGER)) seconds " +\
+          "sum(CAST ((julianday(a.finish) - julianday(a.init)) * 24 * 60 * 60 as INTEGER)) seconds " +\
           "FROM task t " +\
           "LEFT JOIN action a on a.task_id = t.id " +\
           "LEFT JOIN 'order' o on o.id = t.order_id " +\

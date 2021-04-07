@@ -1,6 +1,6 @@
-from sqlalchemy.sql.expression import update
+from model.ModelSqlite import db, Task, Action, Order, TaskType
+from sqlalchemy import and_, func
 
-from model.ModelSqlite import db, Task
 
 
 def save(task):
@@ -9,8 +9,26 @@ def save(task):
     return task
 
 
-def load():
-    return Task.query.all()
+def load_by_date(sumary_date):
+    query = db.session.query(Task, Action, TaskType, Order) \
+        .join(Action, Action.task_id == Task.id) \
+        .join(TaskType, TaskType.id == Task.type_id) \
+        .outerjoin(Order, Order.id == Task.order_id) \
+        .filter(Action.init >= sumary_date)
+    return query.all()
+
+
+def load_by_search(search):
+    filters = [Order.number == search] if search.isnumeric() else [TaskType.name == search]
+    query = db.session.query(Task, Action, TaskType, Order) \
+        .join(Action, Action.task_id == Task.id) \
+        .join(TaskType, TaskType.id == Task.type_id) \
+        .outerjoin(Order, Order.id == Task.order_id) \
+        .filter(and_(*filters)).group_by(Task.id)
+
+
+    print(str(query))
+    return query.all()
 
 
 def load_by_id(id: int):
