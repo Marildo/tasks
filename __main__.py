@@ -26,8 +26,8 @@ database='vooo_prod_backend'
 # TODO: Melhorar a forma de identificar tipos de tarefas
 # TODO: Adicionar um decorator para tratar exception
 # TODO: Editar descrição de action
-# TODO: Dados do card de task
-
+# TODO: Mostra se tarefa possui acao em andamento e agrupar
+# TODO: Show actions running  and flag
 class DAO:
     def load_clients(self):
         conn = mysql.connector.connect(
@@ -38,19 +38,19 @@ class DAO:
         )
 
         cursor = conn.cursor()
-        cursor.execute('Select id, name, trading, economic_group_id, headquarter_id, status from client')
+        cursor.execute('Select id, name, trading, e conomic_group_id, headquarter_id, status from client')
         result = cursor.fetchall()
         cursor.close()
         return result
 
 
-
-
 app = Flask('VoooHelp', static_folder='static', template_folder='template')
+
 
 def locate_html(page: str) -> str:
     return f'pages/{page}.html'
     # TODO : Testar se arquivo existe
+
 
 def load_task_types():
     task_types = taskTypeDao.load()
@@ -102,6 +102,10 @@ def tasks():
             tasks = taskDao.load_by_search(search)
         else:
             tasks = taskDao.load_by_date(sumary_date)
+
+        for task in tasks:
+            actions = task.Action.Task.actions
+            task.Task.running = any([not action.finished for action in actions])
 
         sumary = orderDao.sumary(sumary_date)
         task_types = load_task_types()
@@ -171,7 +175,7 @@ def finalize_action():
     action = actionDao.load_running(task_id)
     action.finish = finish
     action.finished = True
-    action.description = form['description']
+    action.description = action.description + '\n' + form['description']
     actionDao.save(action)
 
     return redirect(url_for('task', id=action.task_id))
@@ -184,10 +188,13 @@ def export_csv():
 
     week_days = ('domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado')
     months = (
-        'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro',
-        'dezembro')
+    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro',
+    'dezembro')
 
-    with open('day.csv', 'w', encoding='utf-8', newline='') as file:
+    date = datetime.strptime(sumary_date, '%Y-%m-%d')
+    filename = f"day-{datetime.strftime(date, '%d-%m-%Y')}.csv"
+
+    with open(filename, 'w', encoding='utf-8', newline='') as file:
         pointer = writer(file)
         total_hours = datetime(year=1, month=1, day=1)
         for task_id, type, description, number, init, seconds in sumary:
@@ -201,7 +208,7 @@ def export_csv():
 
             flag = seconds % 60
             flag = 60 - flag
-            hours = datetime(year=1, month=1, day=1) + timedelta(seconds=seconds+flag)
+            hours = datetime(year=1, month=1, day=1) + timedelta(seconds=seconds + flag)
             total_hours = total_hours + timedelta(seconds=seconds)
 
             if type == 'N3':

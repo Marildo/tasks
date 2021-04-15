@@ -42,14 +42,18 @@
       <div class="col-md-4 col-sm-4">
         <a href="/task/{{ task.Task.id }}">
           <div class="card card-stats">
-            <div class="card-header card-header-success card-header-icon">
+           {% if task.Task.running %}
+             <div class="card-header card-header-warning card-header-icon">
+            {% else %} 
+             <div class="card-header card-header-success card-header-icon">
+            {% endif %}
               <div class="card-icon">
-                <i class="material-icons">task</i>
+                  <i class="material-icons">task</i>
               </div>
               <p class="card-category">{{task.TaskType.name}}</p>
               {% if task.Order %}
-              <h4 class="card-title"> Nº {{task.Order.number}}</h4>
-              <h4 class="card-title">Agregador: {{task.Order.aggregator}}</h4>
+              <h5 class="card-title"> Nº {{task.Order.number}}</h5>
+              <h5 class="card-title">Cliente:{{task.Order.client_id}}-{{task.Order.client_name}}</h5>
               {% endif %}
             </div>
             <div class="card-footer">

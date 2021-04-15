@@ -14,7 +14,8 @@ def load_by_date(sumary_date):
         .join(Action, Action.task_id == Task.id) \
         .join(TaskType, TaskType.id == Task.type_id) \
         .outerjoin(Order, Order.id == Task.order_id) \
-        .filter(Action.init >= sumary_date)
+        .filter(Action.init >= sumary_date)\
+        .group_by(Task.id)
     return query.all()
 
 
@@ -24,10 +25,8 @@ def load_by_search(search):
         .join(Action, Action.task_id == Task.id) \
         .join(TaskType, TaskType.id == Task.type_id) \
         .outerjoin(Order, Order.id == Task.order_id) \
-        .filter(and_(*filters)).group_by(Task.id)
-
-
-    print(str(query))
+        .filter(and_(*filters)).group_by(Task.id)\
+        .group_by(Task.id)
     return query.all()
 
 

@@ -22,7 +22,8 @@ def sumary(sumary_date: str):
         .outerjoin(Action, Action.task_id == Task.id) \
         .join(TaskType, TaskType.id == Task.type_id) \
         .outerjoin(Order, Order.id == Task.order_id) \
-        .filter(Action.init >= sumary_date, Action.finish <= finish)
+        .filter(Action.init >= sumary_date, Action.finish <= finish)\
+        .group_by(Task.id)
     return query.all()
 
 
