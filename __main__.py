@@ -15,35 +15,6 @@ import model.TaskDao as taskDao
 import model.TaskTypeDao as taskTypeDao
 from model.ModelSqlite import ModelSQLITE, Task, TaskType, Order, Action
 
-"""
-host='mysql.vooo.ws',
-user='root',
-password='te4356sfh',
-database='vooo_prod_backend'
-"""
-
-
-# TODO: Melhorar a forma de identificar tipos de tarefas
-# TODO: Adicionar um decorator para tratar exception
-# TODO: Editar descrição de action
-# TODO: Mostra se tarefa possui acao em andamento e agrupar
-# TODO: Show actions running  and flag
-class DAO:
-    def load_clients(self):
-        conn = mysql.connector.connect(
-            host='localhost',
-            user='root',
-            password='si411225',
-            database='vooo_homolog_backend'
-        )
-
-        cursor = conn.cursor()
-        cursor.execute('Select id, name, trading, e conomic_group_id, headquarter_id, status from client')
-        result = cursor.fetchall()
-        cursor.close()
-        return result
-
-
 app = Flask('VoooHelp', static_folder='static', template_folder='template')
 
 
